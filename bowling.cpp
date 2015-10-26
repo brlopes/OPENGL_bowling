@@ -29,8 +29,8 @@ Implement a physically base billiard simulator:
 #include <math.h>
 //=========================================================//
 //=========================================================//
-#define window_width  640
-#define window_height 480
+#define window_width  1450
+#define window_height 1000
 //=========================================================//
 //=========================================================//
 // person position in the environment
@@ -46,6 +46,7 @@ GLfloat   change_collor = 1.0;
 float rad =0;
 const float DEFAULT_SPEED   = 0.4f;
 
+int ball_speed_multi = 1.0;
 bool isgalloping = false;
 int speedfactor = 4;
 GLfloat hanim = 0.0;
@@ -53,7 +54,7 @@ bool goingup = true;
 //=========================================================//
 //=========================================================//
 // Collision detection
-GLfloat p1_radius = 0.3f;
+GLfloat ball_radius = 0.3f;
 GLfloat p2_radius = 0.3f;
 GLfloat p1_x = -2.0f;
 GLfloat p2_x = 2.0f;
@@ -62,6 +63,8 @@ GLfloat p2_y = 2.0f;
 GLfloat p1_z = 5.0f;
 GLfloat p2_z = 5.0f;
 GLfloat change_direction = 1.0;
+GLfloat ball_roll_speed = -8.0;
+bool ballrolling = false;
 //=========================================================//
 const int   WORLD_SIZE = 100;
 static void text_onScreen(int row, int col, const char *fmt, ...);
@@ -205,14 +208,14 @@ GLvoid drawCollision()
 	distance = sqrt(( (p1_x - p2_x) * (p1_x - p2_x) )
 			         + ((p1_y - p2_y) * (p1_y - p2_y))
 			         + ((p1_z - p2_z) * (p1_z - p2_z)));
-	if (distance <= p2_radius + p1_radius){
+	//if (distance <= p2_radius + p1_radius){
 	  // Red :: collision
 	  change_collor = 0.0;
 	  makeSound();
-	}else{
+	//}else{
 	  // Yellow :: no collision
-	  change_collor = 1.0;
-	}
+	  //change_collor = 1.0;
+	//}
     // enable blending for transparent sphere
     glEnable(GL_BLEND);     // Turn Blending On
     glDisable(GL_DEPTH_TEST);   // Turn Depth Testing Off
@@ -222,7 +225,7 @@ GLvoid drawCollision()
 			glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
 			glColor4f(1.0f,change_collor,0.0f,alphaTransparency);
 			glTranslatef(p1_x, p1_y, p1_z);
-			gluSphere(g_normalObject, p1_radius, 16, 10);
+		//	gluSphere(g_normalObject, p1_radius, 16, 10);
 		  glPopMatrix();
 		  // second sphere collides against the first
 		  glPushMatrix();
@@ -236,6 +239,58 @@ GLvoid drawCollision()
 	glEnable(GL_DEPTH_TEST);    // Turn Depth Testing On
 }
 //=========================================================//
+void drawCube()
+{
+
+  glTranslatef(0.0f, 2.0f, -8.0f);
+  glPushMatrix();
+	glColor3f(   1.0,  1.0, 1.0 );
+	glVertex3f(  0.5, -0.5, 0.5 );
+	glVertex3f(  0.5,  0.5, 0.5 );
+	glVertex3f( -0.5,  0.5, 0.5 );
+	glVertex3f( -0.5, -0.5, 0.5 );
+	glEnd();
+
+	// Purple side - RIGHT
+	glBegin(GL_POLYGON);
+	glColor3f(  1.0,  0.0,  1.0 );
+	glVertex3f( 0.5, -0.5, -0.5 );
+	glVertex3f( 0.5,  0.5, -0.5 );
+	glVertex3f( 0.5,  0.5,  0.5 );
+	glVertex3f( 0.5, -0.5,  0.5 );
+	glEnd();
+
+	// Green side - LEFT
+	glBegin(GL_POLYGON);
+	glColor3f(   0.0,  1.0,  0.0 );
+	glVertex3f( -0.5, -0.5,  0.5 );
+	glVertex3f( -0.5,  0.5,  0.5 );
+	glVertex3f( -0.5,  0.5, -0.5 );
+	glVertex3f( -0.5, -0.5, -0.5 );
+	glEnd();
+
+	// Blue side - TOP
+	glBegin(GL_POLYGON);
+	glColor3f(   0.0,  0.0,  1.0 );
+	glVertex3f(  0.5,  0.5,  0.5 );
+	glVertex3f(  0.5,  0.5, -0.5 );
+	glVertex3f( -0.5,  0.5, -0.5 );
+	glVertex3f( -0.5,  0.5,  0.5 );
+	glEnd();
+
+	// Red side - BOTTOM
+	glBegin(GL_POLYGON);
+	glColor3f(   1.0,  0.0,  0.0 );
+	glVertex3f(  0.5, -0.5, -0.5 );
+	glVertex3f(  0.5, -0.5,  0.5 );
+	glVertex3f( -0.5, -0.5,  0.5 );
+	glVertex3f( -0.5, -0.5, -0.5 );
+	glEnd();
+	glEnd();
+  glPopMatrix();
+
+}
+
 void drawAlley()
 {
 
@@ -560,8 +615,104 @@ GLvoid DrawNormalObjects(GLfloat gallop)
     //NO LIGHT ANGLE / WEIRD SHADING
 	GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 0};
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+
+
+
+
+	//if checkCollision()
+
+	int pin1[] = {1.8, 0.0, -14.0};
+	int pin2[] = {2.2, 0.0, -15.0};
+
+
 	drawAlley();
 
+  //bowling ball
+  glPushMatrix();
+  	  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
+  	  glColor4f(1.0f,0.0f,0.0f,1.0f);
+  	  glTranslatef(1.8, 0.5, ball_roll_speed);
+  	  gluSphere(g_normalObject, ball_radius, 16, 10);
+  glPopMatrix();
+
+  //pins
+  glPushMatrix();
+	  glTranslatef(1.8, 0.0,-14.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+	  glTranslatef(2.2, 0.0,-15.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+	  glTranslatef(1.4, 0.0,-15.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+	  glTranslatef(2.4, 0.0,-16.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+	  glTranslatef(1.8, 0.0,-16.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+	  glTranslatef(1.2, 0.0,-16.0);
+	  glRotatef(-90, 1.0, 0.0, 0.0);
+	  glColor4f(1.0f,1.0f,1.0f,1.0f);
+	  ///glrotatef
+	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+	  //top of pin
+	  glPushMatrix();
+			  glTranslatef(0.0, 0.0, 0.5);
+			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+	  glPopMatrix();
+  glPopMatrix();
 
 
 
@@ -632,6 +783,15 @@ void move_camera(void)
         g_playerPos[2] -= sin(rad) * DEFAULT_SPEED;
         g_playerPos[0] -= cos(rad) * DEFAULT_SPEED;
 	}
+	if ( key[SDLK_1] ) {
+		ball_speed_multi = 1;
+	}
+	if ( key[SDLK_2] ) {
+		ball_speed_multi = 2;
+	}
+	if ( key[SDLK_3] ) {
+		ball_speed_multi = 3;
+	}
 }
 //=========================================================//
 //=========================================================//
@@ -641,31 +801,10 @@ static void keyboard(void)
 
 	if ( key[SDLK_s] )
 	{
-		isgalloping = true;
-		makeSound();
+		if (ballrolling == false) {
+			ballrolling = true;
+		}
 	}
-	if ( key[SDLK_d] )
-	{
-		isgalloping = false;
-	}
-	if ( key[SDLK_1] )
-	{
-		speedfactor = 4;
-	}
-	if ( key[SDLK_2] )
-	{
-		speedfactor = 3;
-	}
-	if ( key[SDLK_3] )
-	{
-		speedfactor = 2;
-	}
-	if ( key[SDLK_4] )
-	{
-		speedfactor = 1;
-	}
-
-
 }
 //=========================================================//
 //=========================================================//
@@ -680,6 +819,29 @@ static void display(void)
     // position the light
     GLfloat pos[4] = { 5.0, 5.0, 5.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+    if (ballrolling == true) {
+    	if (ball_speed_multi == 1) {
+				ball_roll_speed -= 0.1;
+    	}
+    	if (ball_speed_multi == 2) {
+    			ball_roll_speed -= 0.2;
+    	}
+    	if (ball_speed_multi == 3) {
+    			ball_roll_speed -= 0.3;
+    	}
+    }else{
+    	ball_roll_speed = -4.0;
+    }
+
+    if (ball_roll_speed < -18.0){
+    	ball_roll_speed = -4.0;
+    	ballrolling = false;
+    }
+
+
+
+
 
     // gallop is used for animation
     static GLfloat gallop = 100.0;
