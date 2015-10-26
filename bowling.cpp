@@ -55,13 +55,13 @@ bool goingup = true;
 //=========================================================//
 // Collision detection
 GLfloat ball_radius = 0.3f;
-GLfloat p2_radius = 0.3f;
-GLfloat p1_x = -2.0f;
-GLfloat p2_x = 2.0f;
-GLfloat p1_y = 2.0f;
-GLfloat p2_y = 2.0f;
-GLfloat p1_z = 5.0f;
-GLfloat p2_z = 5.0f;
+GLfloat p2_radius = 0.1f;
+//GLfloat p1_x = -2.0f;
+//GLfloat p2_x = 2.0f;
+////GLfloat p1_y = 2.0f;
+////GLfloat p2_y = 2.0f;
+//GLfloat p1_z = 5.0f;
+//GLfloat p2_z = 5.0f;
 GLfloat change_direction = 1.0;
 GLfloat ball_roll_speed = -8.0;
 GLfloat ball_roll_angle = 1;
@@ -194,55 +194,51 @@ GLvoid DrawGround()
 } // end DrawGround()
 //=========================================================//
 //=========================================================//
-GLvoid drawCollision()
-{
-	GLfloat alphaTransparency = 0.5;
-	GLfloat distance;
-
-	// move forward and backward
-	p1_x+=0.05f*change_direction;
-	p2_x-=0.05f*change_direction;
-
-	if(p1_x > 2){
-		change_direction=1.0f-2.0f;
-	}
-	if(p1_x < -2){
-		change_direction=1.0f;
-	}
-	// check-collision
-	distance = sqrt(( (p1_x - p2_x) * (p1_x - p2_x) )
-			         + ((p1_y - p2_y) * (p1_y - p2_y))
-			         + ((p1_z - p2_z) * (p1_z - p2_z)));
-	//if (distance <= p2_radius + p1_radius){
-	  // Red :: collision
-	  change_collor = 0.0;
-	  makeSound();
-	//}else{
-	  // Yellow :: no collision
-	  //change_collor = 1.0;
-	//}
-    // enable blending for transparent sphere
-    glEnable(GL_BLEND);     // Turn Blending On
-    glDisable(GL_DEPTH_TEST);   // Turn Depth Testing Off
-	   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		  // first sphere collides against the other
-		  glPushMatrix();
-			glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
-			glColor4f(1.0f,change_collor,0.0f,alphaTransparency);
-			glTranslatef(p1_x, p1_y, p1_z);
-		//	gluSphere(g_normalObject, p1_radius, 16, 10);
-		  glPopMatrix();
-		  // second sphere collides against the first
-		  glPushMatrix();
-			glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
-			glColor4f(1.0f,change_collor,0.0f,alphaTransparency);
-			glTranslatef(p2_x, p2_y, p2_z);
-			gluSphere(g_normalObject, p2_radius, 16, 10);
-		  glPopMatrix();
-
-	glDisable(GL_BLEND);        // Turn Blending Off
-	glEnable(GL_DEPTH_TEST);    // Turn Depth Testing On
-}
+//GLvoid drawCollision(p1_x, p1_z, p2_x, p2_z)
+//{
+//	GLfloat alphaTransparency = 0.5;
+//	GLfloat distance;
+//
+//	if(p1_x > 2){
+//		change_direction=1.0f-2.0f;
+//	}
+//	if(p1_x < -2){
+//		change_direction=1.0f;
+//	}
+//	// check-collision
+//	distance = sqrt(( (p1_x - p2_x) * (p1_x - p2_x) )
+//			         + ((p1_y - p2_y) * (p1_y - p2_y))
+//			         + ((p1_z - p2_z) * (p1_z - p2_z)));
+//	//if (distance <= p2_radius + p1_radius){
+//	  // Red :: collision
+//	  change_collor = 0.0;
+//	  makeSound();
+//	//}else{
+//	  // Yellow :: no collision
+//	  //change_collor = 1.0;
+//	//}
+//    // enable blending for transparent sphere
+//    glEnable(GL_BLEND);     // Turn Blending On
+//    glDisable(GL_DEPTH_TEST);   // Turn Depth Testing Off
+//	   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//		  // first sphere collides against the other
+//		  glPushMatrix();
+//			glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
+//			glColor4f(1.0f,change_collor,0.0f,alphaTransparency);
+//			glTranslatef(p1_x, p1_y, p1_z);
+//		//	gluSphere(g_normalObject, p1_radius, 16, 10);
+//		  glPopMatrix();
+//		  // second sphere collides against the first
+//		  glPushMatrix();
+//			glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
+//			glColor4f(1.0f,change_collor,0.0f,alphaTransparency);
+//			glTranslatef(p2_x, p2_y, p2_z);
+//			gluSphere(g_normalObject, p2_radius, 16, 10);
+//		  glPopMatrix();
+//
+//	glDisable(GL_BLEND);        // Turn Blending Off
+//	glEnable(GL_DEPTH_TEST);    // Turn Depth Testing On
+//}
 
 void drawAlley()
 {
@@ -570,12 +566,9 @@ GLvoid DrawNormalObjects(GLfloat gallop)
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 
 
-
-
 	//if checkCollision()
 
-	int pin1[] = {1.8, 0.0, -14.0};
-	int pin2[] = {2.2, 0.0, -15.0};
+
 
 
 	drawAlley();
@@ -611,84 +604,187 @@ GLvoid DrawNormalObjects(GLfloat gallop)
 
 
   //pins
-  glPushMatrix();
-	  glTranslatef(1.8, 0.0,-14.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
+  //1st row
+  if (ball_roll_speed < -14)
+  {
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
-	  glPopMatrix();
-  glPopMatrix();
+		  glTranslatef(1.8*(ball_roll_angle), 0.0, ball_roll_speed);
+		  glRotatef(180*(ball_roll_angle), 1, 0.0, 1);
+		  glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-  glPushMatrix();
-	  glTranslatef(2.2, 0.0,-15.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
+	  glPopMatrix();
+  }
+  else
+  {
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
-	  glPopMatrix();
-  glPopMatrix();
+		  glTranslatef(1.8, 0.0,-14.0);
+		  glRotatef(-90, 1.0, 0.0, 0.0);
+		  glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-  glPushMatrix();
-	  glTranslatef(1.4, 0.0,-15.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
+	  glPopMatrix();
+  }
+
+
+
+
+
+//2nd row
+  if (ball_roll_speed < -15)
+  {
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glTranslatef(2.2*(ball_roll_angle), 0.0,ball_roll_speed);
+		  glRotatef(-90*(ball_roll_angle), 1.0, 0.0, 1.0);
+		  glColor4f(1.0f,1.0f,0.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
 	  glPopMatrix();
-  glPopMatrix();
 
-  glPushMatrix();
-	  glTranslatef(2.4, 0.0,-16.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glTranslatef(1.4*(ball_roll_angle), 0.0, ball_roll_speed);
+		  glRotatef(-90*(ball_roll_angle), 1.0, 0.0, 1.0);
+		  glColor4f(1.0f,1.0f,0.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
 	  glPopMatrix();
-  glPopMatrix();
-
-  glPushMatrix();
-	  glTranslatef(1.8, 0.0,-16.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
+  }
+  else
+  {
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glTranslatef(2.2, 0.0,-15.0);
+		  glRotatef(-90, 1.0, 0.0, 0.0);
+		  glColor4f(1.0f,1.0f,0.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
 	  glPopMatrix();
-  glPopMatrix();
 
-  glPushMatrix();
-	  glTranslatef(1.2, 0.0,-16.0);
-	  glRotatef(-90, 1.0, 0.0, 0.0);
-	  glColor4f(1.0f,1.0f,1.0f,1.0f);
-	  ///glrotatef
-	  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
-	  //top of pin
 	  glPushMatrix();
-			  glTranslatef(0.0, 0.0, 0.5);
-			  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glTranslatef(1.4, 0.0,-15.0);
+		  glRotatef(-90, 1.0, 0.0, 0.0);
+		  glColor4f(1.0f,1.0f,0.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
 	  glPopMatrix();
-  glPopMatrix();
+  }
 
+
+
+
+  // 3rd row
+  if (ball_roll_speed < -16)
+  {
+	  glPushMatrix();
+		  glTranslatef(1.8*(ball_roll_angle), 0.0,ball_roll_speed);
+		  glRotatef(-180*(ball_roll_angle), 1.0, 0.0, 1.0);
+		  glColor4f(0.0f,1.0f,1.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
+	  glPopMatrix();
+
+	  glPushMatrix();
+		  glTranslatef(1.2*(ball_roll_angle), 0.0,ball_roll_speed);
+		  glRotatef(-90*(ball_roll_angle), 1.0, 0.0, 1.0);
+		  glColor4f(0.0f,1.0f,1.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
+	  glPopMatrix();
+
+	  glPushMatrix();
+		  glTranslatef(2.4*(ball_roll_angle), 0.0,ball_roll_speed);
+		  glRotatef(180*(ball_roll_angle), 1.0, 0.0, 1.0);
+		  glColor4f(0.0f,1.0f,1.0f,1.0f);
+		  ///glrotatef
+		  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+		  //top of pin
+		  glPushMatrix();
+				  glTranslatef(0.0, 0.0, 0.5);
+				  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+		  glPopMatrix();
+	  glPopMatrix();
+  }
+  else
+  {
+		// 3rd row
+		  glPushMatrix();
+			  glTranslatef(1.8, 0.0,-16.0);
+			  glRotatef(-90, 1.0, 0.0, 0.0);
+			  glColor4f(0.0f,1.0f,1.0f,1.0f);
+			  ///glrotatef
+			  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+			  //top of pin
+			  glPushMatrix();
+					  glTranslatef(0.0, 0.0, 0.5);
+					  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+			  glPopMatrix();
+		  glPopMatrix();
+
+		  glPushMatrix();
+			  glTranslatef(1.2, 0.0,-16.0);
+			  glRotatef(-90, 1.0, 0.0, 0.0);
+			  glColor4f(0.0f,1.0f,1.0f,1.0f);
+			  ///glrotatef
+			  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+			  //top of pin
+			  glPushMatrix();
+					  glTranslatef(0.0, 0.0, 0.5);
+					  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+			  glPopMatrix();
+		  glPopMatrix();
+
+		  glPushMatrix();
+			  glTranslatef(2.4, 0.0,-16.0);
+			  glRotatef(-90, 1.0, 0.0, 0.0);
+			  glColor4f(0.0f,1.0f,1.0f,1.0f);
+			  ///glrotatef
+			  gluCylinder(g_normalObject, 0.13, 0.13, 0.5, 32, 4);
+			  //top of pin
+			  glPushMatrix();
+					  glTranslatef(0.0, 0.0, 0.5);
+					  gluCylinder(g_normalObject, 0.06, 0.06, 0.25, 32, 4);
+			  glPopMatrix();
+		  glPopMatrix();
+  }
 
 
   // restore the previous color values
