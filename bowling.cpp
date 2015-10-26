@@ -29,8 +29,8 @@ Implement a physically base billiard simulator:
 #include <math.h>
 //=========================================================//
 //=========================================================//
-#define window_width  1450
-#define window_height 1000
+#define window_width  640
+#define window_height 480
 //=========================================================//
 //=========================================================//
 // person position in the environment
@@ -64,7 +64,12 @@ GLfloat p1_z = 5.0f;
 GLfloat p2_z = 5.0f;
 GLfloat change_direction = 1.0;
 GLfloat ball_roll_speed = -8.0;
+GLfloat ball_roll_angle = 1;
+
 bool ballrolling = false;
+bool angle_selected = false;
+GLfloat ball_direction = 0.0;
+
 //=========================================================//
 const int   WORLD_SIZE = 100;
 static void text_onScreen(int row, int col, const char *fmt, ...);
@@ -237,58 +242,6 @@ GLvoid drawCollision()
 
 	glDisable(GL_BLEND);        // Turn Blending Off
 	glEnable(GL_DEPTH_TEST);    // Turn Depth Testing On
-}
-//=========================================================//
-void drawCube()
-{
-
-  glTranslatef(0.0f, 2.0f, -8.0f);
-  glPushMatrix();
-	glColor3f(   1.0,  1.0, 1.0 );
-	glVertex3f(  0.5, -0.5, 0.5 );
-	glVertex3f(  0.5,  0.5, 0.5 );
-	glVertex3f( -0.5,  0.5, 0.5 );
-	glVertex3f( -0.5, -0.5, 0.5 );
-	glEnd();
-
-	// Purple side - RIGHT
-	glBegin(GL_POLYGON);
-	glColor3f(  1.0,  0.0,  1.0 );
-	glVertex3f( 0.5, -0.5, -0.5 );
-	glVertex3f( 0.5,  0.5, -0.5 );
-	glVertex3f( 0.5,  0.5,  0.5 );
-	glVertex3f( 0.5, -0.5,  0.5 );
-	glEnd();
-
-	// Green side - LEFT
-	glBegin(GL_POLYGON);
-	glColor3f(   0.0,  1.0,  0.0 );
-	glVertex3f( -0.5, -0.5,  0.5 );
-	glVertex3f( -0.5,  0.5,  0.5 );
-	glVertex3f( -0.5,  0.5, -0.5 );
-	glVertex3f( -0.5, -0.5, -0.5 );
-	glEnd();
-
-	// Blue side - TOP
-	glBegin(GL_POLYGON);
-	glColor3f(   0.0,  0.0,  1.0 );
-	glVertex3f(  0.5,  0.5,  0.5 );
-	glVertex3f(  0.5,  0.5, -0.5 );
-	glVertex3f( -0.5,  0.5, -0.5 );
-	glVertex3f( -0.5,  0.5,  0.5 );
-	glEnd();
-
-	// Red side - BOTTOM
-	glBegin(GL_POLYGON);
-	glColor3f(   1.0,  0.0,  0.0 );
-	glVertex3f(  0.5, -0.5, -0.5 );
-	glVertex3f(  0.5, -0.5,  0.5 );
-	glVertex3f( -0.5, -0.5,  0.5 );
-	glVertex3f( -0.5, -0.5, -0.5 );
-	glEnd();
-	glEnd();
-  glPopMatrix();
-
 }
 
 void drawAlley()
@@ -627,13 +580,35 @@ GLvoid DrawNormalObjects(GLfloat gallop)
 
 	drawAlley();
 
+  	glPushMatrix();
+		glColor4f(0.0f,1.0f,0.0f,1.0f);
+		glTranslatef(1.6, 0.1,-3);
+		glRotatef(90, 0, 1, 0);
+
+		if (angle_selected == true)
+		{
+			glRotatef(10 * ball_direction, 0, 1, 0);
+		}
+
+		//drawing of direction
+		glRotatef(90, 1, 0, 0);
+		glBegin(GL_POLYGON);
+			glVertex3f(2.0, 0.0, 0.0);
+			glVertex3f(6.0, 0.0, 0.0);
+			glVertex3f(6.0, 0.2, 0.0);
+			glVertex3f(2.0, 0.4, 0.0);
+		glEnd();
+	glPopMatrix();
+
   //bowling ball
   glPushMatrix();
   	  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, rand() % 128);
-  	  glColor4f(1.0f,0.0f,0.0f,1.0f);
-  	  glTranslatef(1.8, 0.5, ball_roll_speed);
+  	  glColor4f(0.0f,0.0f,1.0f,1.0f);
+  	  glTranslatef(1.8*(ball_roll_angle), 0.4, ball_roll_speed);  // "ball is life" -Ghandi
   	  gluSphere(g_normalObject, ball_radius, 16, 10);
   glPopMatrix();
+
+
 
   //pins
   glPushMatrix();
@@ -792,6 +767,18 @@ void move_camera(void)
 	if ( key[SDLK_3] ) {
 		ball_speed_multi = 3;
 	}
+	if ( key[SDLK_r] ) {
+		ball_direction = -1;
+		angle_selected = true;
+	}
+	if ( key[SDLK_l] ) {
+		ball_direction = 1;
+		angle_selected = true;
+	}
+	if ( key[SDLK_m] ) {
+		ball_direction = 0;
+		angle_selected = true;
+	}
 }
 //=========================================================//
 //=========================================================//
@@ -823,12 +810,38 @@ static void display(void)
     if (ballrolling == true) {
     	if (ball_speed_multi == 1) {
 				ball_roll_speed -= 0.1;
+
+				if(ball_direction > 0)
+				{
+					ball_roll_angle -= 0.003;  // haters gonna hate
+				}
+				if(ball_direction < 0)
+				{
+					ball_roll_angle += 0.003;  // haters gonna hate
+				}
+
     	}
     	if (ball_speed_multi == 2) {
     			ball_roll_speed -= 0.2;
+				if(ball_direction > 0)
+				{
+					ball_roll_angle -= 0.006;  // haters gonna hate
+				}
+				if(ball_direction < 0)
+				{
+					ball_roll_angle += 0.006;  // haters gonna hate
+				}
     	}
     	if (ball_speed_multi == 3) {
     			ball_roll_speed -= 0.3;
+				if(ball_direction > 0)
+				{
+					ball_roll_angle -= 0.009;  // haters gonna hate
+				}
+				if(ball_direction < 0)
+				{
+					ball_roll_angle += 0.009;  // haters gonna hate
+				}
     	}
     }else{
     	ball_roll_speed = -4.0;
